@@ -5,10 +5,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import jp.techacademy.shingo.fuse.apiapp.databinding.FragmentApiBinding
+
 
 class FavoriteFragment: Fragment() {
     private var _binding: FragmentApiBinding? = null
@@ -46,7 +46,7 @@ class FavoriteFragment: Fragment() {
             }
             //Itemをクリックしたとき
             onClickItem = {
-                fragmentCallback?.onClickItem(it)
+                fragmentCallback?.onClickItem(it,it,it,it,it)
             }
         }
         // RecyclerViewの初期化
