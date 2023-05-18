@@ -9,7 +9,6 @@ import android.view.ViewGroup
 import jp.techacademy.shingo.fuse.apiapp.databinding.FragmentApiBinding
 import androidx.recyclerview.widget.LinearLayoutManager
 import android.os.Handler
-import android.provider.SyncStateContract.Helpers.update
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.squareup.moshi.Moshi
@@ -67,7 +66,7 @@ class ApiFragment : Fragment() {
             }
             //Itemをクリックした時
             onClickItem = {
-                fragmentCallback?.onClickItem(it)
+                fragmentCallback?.onClickItem(it,it,it,it,it)
             }
         }
 

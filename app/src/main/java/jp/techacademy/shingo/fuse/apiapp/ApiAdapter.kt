@@ -67,31 +67,39 @@ class ApiItemViewHolder(private val binding: RecyclerFavoriteBinding) :
         // nameTextViewのtextプロパティに代入されたオブジェクトのnameプロパティを代入
         binding.nameTextView.text = shop.name
 
+
         //adressTextViewのtextプロパティに代入されたオブジェクトのadressプロパティを代入
-        binding.adressTextView.text = "住所:"+shop.address
+        binding.adressTextView.text = "住所:" + shop.address
+        binding.adressTextView.setTextColor(
+            ContextCompat.getColor(binding.rootView.context, R.color.blue
+            )
+        )
+
 
         // Picassoライブラリを使い、imageViewにdata.logoImageのurlの画像を読み込ませる
         Picasso.get().load(shop.logoImage).into(binding.imageView)
 
-        // 星の処理
-        binding.favoriteImageView.apply {
-            // お気に入り状態を取得
-            val isFavorite = FavoriteShop.findBy(shop.id) != null
+            // 星の処理
+            binding.favoriteImageView.apply {
+                // お気に入り状態を取得
+                val isFavorite = FavoriteShop.findBy(shop.id) != null
 
-            // 白抜きの星を設定
-            setImageResource(if (isFavorite) R.drawable.ic_star else R.drawable.ic_star_border)
+                // 白抜きの星を設定
+                setImageResource(if (isFavorite) R.drawable.ic_star else R.drawable.ic_star_border)
 
-            // 星をタップした時の処理
-            setOnClickListener {
-                if (isFavorite) {
-                    adapter.onClickDeleteFavorite?.invoke(shop)
-                } else {
-                    adapter.onClickAddFavorite?.invoke(shop)
+                // 星をタップした時の処理
+                setOnClickListener {
+                    if (isFavorite) {
+                        adapter.onClickDeleteFavorite?.invoke(shop)
+                    } else {
+                        adapter.onClickAddFavorite?.invoke(shop)
+                    }
+                    adapter.notifyItemChanged(position)
                 }
-                adapter.notifyItemChanged(position)
             }
         }
-    }
+
+
 
 
     /**

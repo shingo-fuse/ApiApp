@@ -55,6 +55,8 @@ class FavoriteItemViewHolder(private val binding: RecyclerFavoriteBinding) :
 
         // nameTextViewのaddressプロパティに代入されたオブジェクトのnameプロパティを代入
         binding.adressTextView.text = favoriteShop.address
+        binding.adressTextView.setTextColor(ContextCompat.getColor(binding.rootView.context, R.color.blue))
+
 
         // Picassoというライブラリを使ってImageVIewに画像をはめ込む
         Picasso.get().load(favoriteShop.imageUrl).into(binding.imageView)
