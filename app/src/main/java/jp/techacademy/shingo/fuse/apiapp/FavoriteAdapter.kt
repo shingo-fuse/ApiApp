@@ -15,7 +15,7 @@ class FavoriteAdapter : ListAdapter<FavoriteShop, FavoriteItemViewHolder>(Favori
     // お気に入り画面から削除するときのコールバック（ApiFragmentへ通知するメソッド)
     var onClickDeleteFavorite: ((FavoriteShop) -> Unit)? = null
     // Itemを押したときのメソッド
-    var onClickItem: ((String) -> Unit)? = null
+    var onClickItem: ((String,String,String,String,String) -> Unit)? = null
 
 
     /**
@@ -49,6 +49,24 @@ class FavoriteItemViewHolder(private val binding: RecyclerFavoriteBinding) :
                 if (position % 2 == 0) android.R.color.white else android.R.color.darker_gray
             )
         )
+        val shop = Shop(
+            favoriteShop.id,
+            favoriteShop.address,
+            CouponUrls(pc = favoriteShop.url, sp = favoriteShop.url),
+            favoriteShop.imageUrl,
+            favoriteShop.name
+        )
+
+
+        binding.rootView.setOnClickListener{
+            val id:String = favoriteShop.id
+            val imageUrls = favoriteShop.imageUrl
+            val url = if (shop.couponUrls.sp.isNotEmpty()) shop.couponUrls.sp else shop.couponUrls.pc
+            val name = favoriteShop.name
+            val address = favoriteShop.address
+            adapter.onClickItem?.invoke(id,name,imageUrls,url,address)
+
+        }
 
         // nameTextViewのtextプロパティに代入されたオブジェクトのnameプロパティを代入
         binding.nameTextView.text = favoriteShop.name

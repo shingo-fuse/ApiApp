@@ -8,7 +8,7 @@ import io.realm.kotlin.types.annotations.PrimaryKey
 
 
 
-open class FavoriteShop(id: String, imageUrl: String, name: String, url: String, address:String) : RealmObject {
+open class FavoriteShop(id: String, imageUrl: String, name: String,  url: String, address:String) : RealmObject {
     @PrimaryKey
     var id: String = ""
     var imageUrl: String = ""

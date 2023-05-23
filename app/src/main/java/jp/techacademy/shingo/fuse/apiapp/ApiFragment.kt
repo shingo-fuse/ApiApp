@@ -19,6 +19,7 @@ import java.io.IOException
 class ApiFragment : Fragment() {
     private var _binding: FragmentApiBinding? = null
 
+
     //一覧に表示するShopを保持
     private  var list = mutableListOf<Shop>()
     //現在のページ
@@ -64,10 +65,14 @@ class ApiFragment : Fragment() {
             onClickDeleteFavorite = {
                 fragmentCallback?.onDeleteFavorite(it.id)
             }
+
+
+
             //Itemをクリックした時
-            onClickItem = {
-                fragmentCallback?.onClickItem(it,it,it,it,it)
+            onClickItem = { id: String, name: String, url: String, imageUrls: String, address: String ->
+                fragmentCallback?.onClickItem(id,name,imageUrls,url,address)
             }
+
         }
 
         // RecyclerViewの初期化

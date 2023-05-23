@@ -23,9 +23,9 @@ class ApiAdapter : ListAdapter<Shop, ApiItemViewHolder>(ApiItemViewHolder.ApiIte
 
     // 一覧画面から削除するときのコールバック（ApiFragmentへ通知するメソッド)
     var onClickDeleteFavorite: ((Shop) -> Unit)? = null
-    // Itemを押したときのメソッド
-    var onClickItem: ((String) -> Unit)? = null
 
+    // Itemを押したときのメソッド
+    var onClickItem: ((String,String,String,String,String) -> Unit)? = null
 
 
     /**
@@ -52,6 +52,7 @@ class ApiAdapter : ListAdapter<Shop, ApiItemViewHolder>(ApiItemViewHolder.ApiIte
 class ApiItemViewHolder(private val binding: RecyclerFavoriteBinding) :
     RecyclerView.ViewHolder(binding.root) {
     fun bind(shop: Shop, position: Int, adapter: ApiAdapter) {
+
         binding.rootView.apply {
             // 偶数番目と奇数番目で背景色を変更させる
             binding.rootView.setBackgroundColor(
@@ -60,9 +61,19 @@ class ApiItemViewHolder(private val binding: RecyclerFavoriteBinding) :
                     if (position % 2 == 0) android.R.color.white else android.R.color.darker_gray
                 )
             )
+
             setOnClickListener {
-                adapter.onClickItem?.invoke(if (shop.couponUrls.sp.isNotEmpty()) shop.couponUrls.sp else shop.couponUrls.pc)
+                val id:String = shop.id
+                val imageUrls = shop.logoImage
+                val url = if (shop.couponUrls.sp.isNotEmpty()) shop.couponUrls.sp else shop.couponUrls.pc
+                val name = shop.name
+                val address = shop.address
+                adapter.onClickItem?.invoke(id,name,url,imageUrls,address)
+
+
+
             }
+
         }
         // nameTextViewのtextプロパティに代入されたオブジェクトのnameプロパティを代入
         binding.nameTextView.text = shop.name
@@ -94,12 +105,10 @@ class ApiItemViewHolder(private val binding: RecyclerFavoriteBinding) :
                     } else {
                         adapter.onClickAddFavorite?.invoke(shop)
                     }
-                    adapter.notifyItemChanged(position)
+                   adapter.notifyItemChanged(position)
                 }
             }
         }
-
-
 
 
     /**
