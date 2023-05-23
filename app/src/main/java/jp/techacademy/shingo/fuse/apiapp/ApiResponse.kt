@@ -3,6 +3,7 @@ import com.squareup.moshi.JsonClass
 
 import com.squareup.moshi.Json
 
+
 @JsonClass(generateAdapter = true)
 data class ApiResponse(
     @Json(name = "results")
@@ -17,16 +18,17 @@ data class Results(
 
 @JsonClass(generateAdapter = true)
 data class Shop(
+    @Json(name = "id")
+    val id: String,
     @Json(name = "address")
     val address: String,
     @Json(name = "coupon_urls")
     val couponUrls: CouponUrls,
-    @Json(name = "id")
-    val id: String,
     @Json(name = "logo_image")
     val logoImage: String,
     @Json(name = "name")
     val name: String
+
 )
 
 @JsonClass(generateAdapter = true)
@@ -36,4 +38,3 @@ data class CouponUrls(
     @Json(name = "sp")
     val sp: String
 )
-

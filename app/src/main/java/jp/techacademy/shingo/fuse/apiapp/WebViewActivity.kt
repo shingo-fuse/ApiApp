@@ -2,22 +2,51 @@ package jp.techacademy.shingo.fuse.apiapp
 
 import android.app.Activity
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.provider.Contacts.SettingsColumns.KEY
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import jp.techacademy.shingo.fuse.apiapp.databinding.ActivityWebViewBinding
+import jp.techacademy.shingo.fuse.apiapp.Shop as Shop
+
 
 class WebViewActivity : AppCompatActivity(),FragmentCallback {
-    private  lateinit var binding:ActivityWebViewBinding
+    private lateinit var binding: ActivityWebViewBinding
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityWebViewBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+
         binding.webView.loadUrl(intent.getStringExtra(KEY_URL).toString())
 
+        val shopId = intent.getStringExtra(KEY_ID).toString()
+        val shopName = intent.getStringExtra(KEY_NAME).toString()
+        val shopImageUrl = intent.getStringExtra(KEY_IMAGE_URLS).toString()
+        val shopUrl = intent.getStringExtra(KEY_URL).toString()
+        val shopAddress = intent.getStringExtra(KEY_ADDRESS).toString()
+        val shopIsDelete = intent.getBooleanExtra(KEY_ISDELETED,false)
+
+
+        val shop = Shop(
+            shopId,
+            shopAddress,
+            CouponUrls(pc = shopUrl, sp = shopUrl),
+            shopImageUrl,
+            shopName
+        )
+        val favoriteShop = FavoriteShop().apply{
+            id = shopId
+            name = shopName
+            imageUrl = shopImageUrl
+            address = shopAddress
+            url = shopUrl
+            isDeleted = shopIsDelete
+        }
+
         binding.favoriteImage.apply {
-            val shop = FavoriteShop()
 
             var isFavorite = FavoriteShop.findBy(shop.id) != null
 
@@ -26,28 +55,28 @@ class WebViewActivity : AppCompatActivity(),FragmentCallback {
 
             setOnClickListener {
                 if (isFavorite) {
-                    deleteFavorite(shop.id)
+                    onDeleteFavorite(favoriteShop)
                 } else {
-                    onAddFavorite()
+                    onAddFavorite(shop)
                 }
                 // お気に入り状態を更新
                 isFavorite = !isFavorite
                 setImageResource(if (isFavorite) R.drawable.ic_star else R.drawable.ic_star_border)
+
+
             }
-
         }
-
-
-
-
-
     }
+
+
     companion object {
         private const val KEY_ID = "Key_id"
         private const val KEY_NAME = "Key_name"
         private const val KEY_IMAGE_URLS = "Key_imageUrls"
         private const val KEY_URL = "Key_url"
         private const val KEY_ADDRESS = "Key_address"
+        private  const val KEY_ISDELETED = "key_deleted"
+
 
         fun start(
             activity: Activity,
@@ -55,8 +84,10 @@ class WebViewActivity : AppCompatActivity(),FragmentCallback {
             name: String,
             imageUrls: String,
             url: String,
-            address: String
-        ) {
+            address: String,
+            isDeleted:Boolean
+
+            ) {
             activity.startActivity(
                 Intent(activity, WebViewActivity::class.java).apply {
                     putExtra(KEY_ID, id)
@@ -64,23 +95,24 @@ class WebViewActivity : AppCompatActivity(),FragmentCallback {
                     putExtra(KEY_IMAGE_URLS, imageUrls)
                     putExtra(KEY_URL, url)
                     putExtra(KEY_ADDRESS, address)
+                    putExtra(KEY_ISDELETED, isDeleted)
+
                 }
             )
         }
     }
+
 
     override fun onClickItem(
         id: String,
         name: String,
         url: String,
         imageUrls: String,
-        address: String
-    ) {
+        address: String,
+        isDeleted: Boolean
 
-    }
-    /**
-     * Favoriteに追加するときのメソッド(Fragment -> Activity へ通知する)
-     */
+        ) {}
+
     override fun onAddFavorite(shop: Shop) {
         FavoriteShop.insert(FavoriteShop().apply {
             id = shop.id
@@ -94,29 +126,27 @@ class WebViewActivity : AppCompatActivity(),FragmentCallback {
     }
 
 
-
-
-    /**
-     * Favoriteから削除するときのメソッド(Fragment -> Activity へ通知する)
-     */
-    override fun onDeleteFavorite(id: String) {
-        showConfirmDeleteFavoriteDialog(id)
+    override fun onDeleteFavorite(favoriteShop: FavoriteShop) {
+        showConfirmDeleteFavoriteDialog(favoriteShop)
     }
 
-    private fun showConfirmDeleteFavoriteDialog(id: String) {
+
+    private fun showConfirmDeleteFavoriteDialog(favoriteShop: FavoriteShop) {
         AlertDialog.Builder(this)
             .setTitle(R.string.delete_favorite_dialog_title)
             .setMessage(R.string.delete_favorite_dialog_message)
             .setPositiveButton(android.R.string.ok) { _, _ ->
-                deleteFavorite(id)
+                deleteFavorite(favoriteShop)
             }
             .setNegativeButton(android.R.string.cancel) { _, _ -> }
             .create()
             .show()
     }
 
-    private fun deleteFavorite(id: String) {
-        FavoriteShop.delete(id)
+    private fun deleteFavorite(favoriteShop: FavoriteShop) {
+        FavoriteShop.delete(favoriteShop)
 
     }
-    }
+
+
+}

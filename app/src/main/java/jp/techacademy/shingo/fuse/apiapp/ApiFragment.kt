@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import jp.techacademy.shingo.fuse.apiapp.databinding.FragmentApiBinding
 import androidx.recyclerview.widget.LinearLayoutManager
 import android.os.Handler
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.squareup.moshi.Moshi
@@ -18,6 +19,7 @@ import java.io.IOException
 
 class ApiFragment : Fragment() {
     private var _binding: FragmentApiBinding? = null
+
 
     //一覧に表示するShopを保持
     private  var list = mutableListOf<Shop>()
@@ -62,12 +64,14 @@ class ApiFragment : Fragment() {
             }
             // Adapterの処理をそのままActivityに通知する
             onClickDeleteFavorite = {
-                fragmentCallback?.onDeleteFavorite(it.id)
+                fragmentCallback?.onDeleteFavorite(it)
             }
+
             //Itemをクリックした時
-            onClickItem = {
-                fragmentCallback?.onClickItem(it,it,it,it,it)
+            onClickItem = { id: String, name: String, url: String, imageUrls: String, address: String,deleted: Boolean->
+                fragmentCallback?.onClickItem(id,name,imageUrls,url,address,deleted)
             }
+
         }
 
         // RecyclerViewの初期化
@@ -96,13 +100,13 @@ class ApiFragment : Fragment() {
                     // ここでは、一番下から5番目を表示した時に追加読み込みする様に実装する
                     if(!isLoading && lastVisibleItem >= totalCount - 6){//読み込み中でない、かつ、現在のスクロール位置から下に５検見えないいちがある。
                         updateData(true)
+                    }
                 }
-            }
             })
         }
         binding.swipeRefreshLayout.setOnRefreshListener {
-                updateData()
-            }
+            updateData()
+        }
         updateData()
     }
 

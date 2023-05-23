@@ -42,11 +42,12 @@ class FavoriteFragment: Fragment() {
         favoriteAdapter.apply {
             // Adapterの処理をそのままActivityに通知
             onClickDeleteFavorite = {
-                fragmentCallback?.onDeleteFavorite(it.id)
+                fragmentCallback?.onDeleteFavorite(it)
             }
+
             //Itemをクリックしたとき
-            onClickItem = {
-                fragmentCallback?.onClickItem(it,it,it,it,it)
+            onClickItem = { id: String, name: String, imageUrls: String, url: String, address: String,isDeleted :Boolean ->
+                fragmentCallback?.onClickItem(id,name,imageUrls,url,address,isDeleted)
             }
         }
         // RecyclerViewの初期化
