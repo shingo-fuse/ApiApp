@@ -3,6 +3,7 @@ package jp.techacademy.shingo.fuse.apiapp
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.PersistableBundle
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.viewpager2.widget.ViewPager2
@@ -12,6 +13,7 @@ import jp.techacademy.shingo.fuse.apiapp.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity(), FragmentCallback {
     private lateinit var binding: ActivityMainBinding
+    private var list = mutableListOf<Shop>()
 
     private val viewPagerAdapter by lazy { ViewPagerAdapter(this) }
 
@@ -41,6 +43,7 @@ class MainActivity : AppCompatActivity(), FragmentCallback {
             // タブが選択された際に呼ばれる
             override fun onTabSelected(tab: TabLayout.Tab) {
                 showFavoriteTabInfo(tab)
+                (viewPagerAdapter.fragments[VIEW_PAGER_POSITION_FAVORITE] as FavoriteFragment).updateData()
             }
 
             override fun onTabUnselected(tab: TabLayout.Tab) {}
@@ -48,8 +51,11 @@ class MainActivity : AppCompatActivity(), FragmentCallback {
         })
     }
 
-    override fun onClickItem(id:String, name: String,url:String, imageUrls: String, address: String){
-        WebViewActivity.start(this, id , name , url , imageUrls , address)
+
+
+    override fun onClickItem(id:String, name: String,imageUrls: String, url: String, address: String){
+        WebViewActivity.start(this, id, name, imageUrls, url, address)
+
     }
 
 
@@ -64,6 +70,8 @@ class MainActivity : AppCompatActivity(), FragmentCallback {
                 .show()
         }
     }
+
+
 
     /**
      * Favoriteに追加するときのメソッド(Fragment -> Activity へ通知する)
@@ -111,5 +119,11 @@ class MainActivity : AppCompatActivity(), FragmentCallback {
     companion object {
         private const val VIEW_PAGER_POSITION_API = 0
         private const val VIEW_PAGER_POSITION_FAVORITE = 1
+    }
+
+    override fun onResume() {
+        super.onResume()
+        (viewPagerAdapter.fragments[VIEW_PAGER_POSITION_API] as ApiFragment).updateView()
+
     }
 }
