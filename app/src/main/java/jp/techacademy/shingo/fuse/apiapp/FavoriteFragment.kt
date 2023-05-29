@@ -42,8 +42,9 @@ class FavoriteFragment: Fragment() {
         favoriteAdapter.apply {
             // Adapterの処理をそのままActivityに通知
             onClickDeleteFavorite = {
-                fragmentCallback?.onDeleteFavorite(it)
+                fragmentCallback?.onDeleteFavorite(it.id)
             }
+
 
             //Itemをクリックしたとき
             onClickItem = { id: String, name: String, imageUrls: String, url: String, address: String,isDeleted :Boolean ->

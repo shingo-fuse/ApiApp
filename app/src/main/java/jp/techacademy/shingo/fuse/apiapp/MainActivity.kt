@@ -8,11 +8,15 @@ import androidx.appcompat.app.AlertDialog
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
+import jp.techacademy.shingo.fuse.apiapp.FavoriteShop.Companion.findBy
+import jp.techacademy.shingo.fuse.apiapp.FavoriteShop.Companion.findById
+
 import jp.techacademy.shingo.fuse.apiapp.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity(), FragmentCallback {
     private lateinit var binding: ActivityMainBinding
-    private var list = mutableListOf<Shop>()
+
+
 
     private val viewPagerAdapter by lazy { ViewPagerAdapter(this) }
 
@@ -51,9 +55,15 @@ class MainActivity : AppCompatActivity(), FragmentCallback {
     }
 
 
-
-    override fun onClickItem(id:String, name: String,imageUrls: String, url: String, address: String,isDeleted:Boolean){
-        WebViewActivity.start(this, id, name, imageUrls, url, address,isDeleted)
+    override fun onClickItem(
+        id: String,
+        name: String,
+        imageUrls: String,
+        url: String,
+        address: String,
+        isDeleted: Boolean
+    ) {
+        WebViewActivity.start(this, id, name, imageUrls, url, address, isDeleted)
 
     }
 
@@ -62,8 +72,7 @@ class MainActivity : AppCompatActivity(), FragmentCallback {
      * お気に入りタブにトーストを表示
      */
     private fun showFavoriteTabInfo(tab: TabLayout.Tab) {
-        if (tab.position == VIEW_PAGER_POSITION_FAVORITE && FavoriteShop.findAll()
-                .isEmpty()
+        if (tab.position == VIEW_PAGER_POSITION_FAVORITE && FavoriteShop.findAll().isEmpty()
         ) {
             Toast.makeText(this@MainActivity, R.string.empty_favorite, Toast.LENGTH_SHORT)
                 .show()
@@ -71,36 +80,40 @@ class MainActivity : AppCompatActivity(), FragmentCallback {
     }
 
 
-
     /**
      * Favoriteに追加するときのメソッド(Fragment -> Activity へ通知する)
      */
     override fun onAddFavorite(shop: Shop) {
-        FavoriteShop.insert(FavoriteShop().apply {
-            id = shop.id
-            name = shop.name
-            imageUrl = shop.logoImage
-            address = shop.address
-            url = shop.couponUrls.sp.ifEmpty { shop.couponUrls.pc
-            }
-            isDeleted = false
-        })
+        val findShop = findBy(shop.id)
+        if (findShop != null) {
+            FavoriteShop.insert(FavoriteShop().apply {
+                id = shop.id
+                name = shop.name
+                imageUrl = shop.logoImage
+                address = shop.address
+                url = shop.couponUrls.sp.ifEmpty {
+                    shop.couponUrls.pc
+                }
+                isDeleted = false
+            })}else{
+            FavoriteShop.updateInsert()
+        }
         (viewPagerAdapter.fragments[VIEW_PAGER_POSITION_FAVORITE] as FavoriteFragment).updateData()
     }
 
     /**
      * Favoriteから削除するときのメソッド(Fragment -> Activity へ通知する)
      */
-    override fun onDeleteFavorite(favoriteShop: FavoriteShop) {
-        showConfirmDeleteFavoriteDialog(favoriteShop)
+    override fun onDeleteFavorite(id: String) {
+        showConfirmDeleteFavoriteDialog(id)
     }
 
-    private fun showConfirmDeleteFavoriteDialog(favoriteShop: FavoriteShop) {
+    private fun showConfirmDeleteFavoriteDialog(id: String) {
         AlertDialog.Builder(this)
             .setTitle(R.string.delete_favorite_dialog_title)
             .setMessage(R.string.delete_favorite_dialog_message)
             .setPositiveButton(android.R.string.ok) { _, _ ->
-                deleteFavorite(favoriteShop)
+                deleteFavorite(id)
                 if (binding.tabLayout.selectedTabPosition == VIEW_PAGER_POSITION_FAVORITE) {
                     showFavoriteTabInfo(binding.tabLayout.getTabAt(binding.tabLayout.selectedTabPosition)!!)
                 }
@@ -110,12 +123,12 @@ class MainActivity : AppCompatActivity(), FragmentCallback {
             .show()
     }
 
-    private fun deleteFavorite(favoriteShop: FavoriteShop) {
-        favoriteShop.isDeleted =true
-         FavoriteShop.delete(favoriteShop)
+    private fun deleteFavorite(id: String) {
+        FavoriteShop.delete(id)
 
-        (viewPagerAdapter.fragments[VIEW_PAGER_POSITION_API] as ApiFragment).updateView()
         (viewPagerAdapter.fragments[VIEW_PAGER_POSITION_FAVORITE] as FavoriteFragment).updateData()
+        (viewPagerAdapter.fragments[VIEW_PAGER_POSITION_API] as ApiFragment).updateView()
+
     }
 
     companion object {
@@ -128,4 +141,6 @@ class MainActivity : AppCompatActivity(), FragmentCallback {
         (viewPagerAdapter.fragments[VIEW_PAGER_POSITION_API] as ApiFragment).updateView()
 
     }
+
+
 }

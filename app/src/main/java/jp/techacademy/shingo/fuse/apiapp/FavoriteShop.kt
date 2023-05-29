@@ -1,5 +1,6 @@
 package jp.techacademy.shingo.fuse.apiapp
 
+import android.util.Log
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 import io.realm.kotlin.ext.query
@@ -8,14 +9,14 @@ import io.realm.kotlin.types.annotations.PrimaryKey
 
 
 
-open class FavoriteShop(id: String, imageUrl: String, name: String,  url: String, address:String , isDeleted:Boolean) : RealmObject {
+open class FavoriteShop(id: String, imageUrl: String, name: String, url: String,address:String, isDeleted:Boolean) : RealmObject{
     @PrimaryKey
     var id: String = ""
     var imageUrl: String = ""
     var name: String = ""
     var url: String = ""
-    var address :String = ""
-    var isDeleted :Boolean = false
+    var address: String = ""
+    var isDeleted: Boolean = false
 
     // 初期化処理
     init {
@@ -28,7 +29,7 @@ open class FavoriteShop(id: String, imageUrl: String, name: String,  url: String
     }
 
     // realm内部呼び出し用にコンストラクタを用意
-    constructor() : this("", "", "", "","",false)
+    constructor() : this("", "", "", "", "", false)
 
     companion object {
         /**
@@ -41,8 +42,11 @@ open class FavoriteShop(id: String, imageUrl: String, name: String,  url: String
 
             // Realmデータベースからお気に入り情報を取得
             // mapでディープコピーしてresultに代入する
-            val result = realm.query<FavoriteShop>().find()
-                .map { FavoriteShop(it.id, it.imageUrl, it.name, it.url,it.address,it.isDeleted) }
+            val result = realm.query<FavoriteShop>("isDeleted==false").find().map {
+                FavoriteShop(
+                    it.id, it.imageUrl, it.name, it.url, it.address, it.isDeleted
+                )
+            }
 
             // Realmデータベースとの接続を閉じる
             realm.close()
@@ -54,12 +58,27 @@ open class FavoriteShop(id: String, imageUrl: String, name: String,  url: String
          * お気に入りされているShopをidで検索して返す
          * お気に入りに登録されていなければnullで返す
          */
+
+
         fun findBy(id: String): FavoriteShop? {
             // Realmデータベースとの接続を開く
             val config = RealmConfiguration.create(schema = setOf(FavoriteShop::class))
             val realm = Realm.open(config)
 
-            val result = realm.query<FavoriteShop>("id=='$id'").first().find()
+            val result = realm.query<FavoriteShop>("id=='$id' and isDeleted == false " ).first().find()
+
+            // Realmデータベースとの接続を閉じる
+            realm.close()
+
+            return result
+        }
+
+        fun findById(id: String): FavoriteShop? {
+            // Realmデータベースとの接続を開く
+            val config = RealmConfiguration.create(schema = setOf(FavoriteShop::class))
+            val realm = Realm.open(config)
+
+            val result = realm.query<FavoriteShop>("id=='$id' and isDeleted == false " ).first().find()
 
             // Realmデータベースとの接続を閉じる
             realm.close()
@@ -75,31 +94,47 @@ open class FavoriteShop(id: String, imageUrl: String, name: String,  url: String
             val config = RealmConfiguration.create(schema = setOf(FavoriteShop::class))
             val realm = Realm.open(config)
 
-            // 登録処理
             realm.writeBlocking {
-                copyToRealm(favoriteShop)
-            }
-
-            // Realmデータベースとの接続を閉じる
+                    copyToRealm(favoriteShop)
+                }
             realm.close()
         }
+
+        fun updateInsert() {
+            val config = RealmConfiguration.create(schema = setOf(FavoriteShop::class))
+            val realm = Realm.open(config)
+
+            realm.writeBlocking {
+                val favoriteShops = realm.query<FavoriteShop>().first().find()
+                findLatest(favoriteShops!!).apply {
+                    this!!.isDeleted =false
+                }
+                }
+            realm.close()
+        }
+
+
+
+
 
         /**
          * idでお気に入りから削除する
          */
-        fun delete(favoriteShop:FavoriteShop) {
+        fun delete(id: String) {
             // Realmデータベースとの接続を開く
             val config = RealmConfiguration.create(schema = setOf(FavoriteShop::class))
             val realm = Realm.open(config)
 
-
+            // 削除処理
             realm.writeBlocking {
-                copyToRealm(favoriteShop)
+                val favoriteShops = realm.query<FavoriteShop>("id == '$id'").first().find()
+                findLatest(favoriteShops!!).apply {
+                    this!!.isDeleted = true
                 }
-            realm.close()
             }
 
             // Realmデータベースとの接続を閉じる
-
+            realm.close()
         }
     }
+}

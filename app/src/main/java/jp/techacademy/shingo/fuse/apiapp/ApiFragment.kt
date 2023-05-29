@@ -20,6 +20,8 @@ import java.io.IOException
 class ApiFragment : Fragment() {
     private var _binding: FragmentApiBinding? = null
 
+    private  var keywordUrl :String = "ランチ"
+
 
     //一覧に表示するShopを保持
     private  var list = mutableListOf<Shop>()
@@ -64,13 +66,20 @@ class ApiFragment : Fragment() {
             }
             // Adapterの処理をそのままActivityに通知する
             onClickDeleteFavorite = {
-                fragmentCallback?.onDeleteFavorite(it)
+                fragmentCallback?.onDeleteFavorite(it.id)
             }
 
+
             //Itemをクリックした時
-            onClickItem = { id: String, name: String, url: String, imageUrls: String, address: String,deleted: Boolean->
-                fragmentCallback?.onClickItem(id,name,imageUrls,url,address,deleted)
+            onClickItem = { id: String, name: String, url: String, imageUrls: String, address: String,isDeleted: Boolean->
+                fragmentCallback?.onClickItem(id,name,imageUrls,url,address,isDeleted)
             }
+        }
+
+        binding.button.setOnClickListener{
+            val keyWord = binding.editText.text.toString()
+            keywordUrl = keyWord
+            updateData()
 
         }
 
@@ -142,7 +151,7 @@ class ApiFragment : Fragment() {
             .append("&start=").append(start) // 何件目からのデータを取得するか
             .append("&count=").append(COUNT) // 1回で20件取得する
             .append("&keyword=")
-            .append(getString(R.string.api_keyword)) // お店の検索ワード。ここでは例として「ランチ」を検索
+            .append(keywordUrl) // お店の検索ワード。ここでは例として「ランチ」を検索
             .append("&format=json") // ここで利用しているAPIは戻りの形をxmlかjsonが選択することができる。Androidで扱う場合はxmlよりもjsonの方が扱いやすいので、jsonを選択
             .toString()
         val client = OkHttpClient.Builder()

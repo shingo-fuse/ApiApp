@@ -2,6 +2,7 @@ package jp.techacademy.shingo.fuse.apiapp
 
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
@@ -10,12 +11,15 @@ import androidx.recyclerview.widget.RecyclerView
 import com.squareup.picasso.Picasso
 import jp.techacademy.shingo.fuse.apiapp.databinding.RecyclerFavoriteBinding
 
-class FavoriteAdapter : ListAdapter<FavoriteShop, FavoriteItemViewHolder>(FavoriteCallback()) {
+class FavoriteAdapter : ListAdapter<FavoriteShop,FavoriteItemViewHolder>(FavoriteCallback()) {
 
     // お気に入り画面から削除するときのコールバック（ApiFragmentへ通知するメソッド)
     var onClickDeleteFavorite: ((FavoriteShop) -> Unit)? = null
+
+
     // Itemを押したときのメソッド
-    var onClickItem: ((String,String,String,String,String,Boolean) -> Unit)? = null
+    var onClickItem: ((String, String, String, String, String, Boolean) -> Unit)? = null
+
 
 
     /**
@@ -31,10 +35,12 @@ class FavoriteAdapter : ListAdapter<FavoriteShop, FavoriteItemViewHolder>(Favori
     /**
      * 指定された位置（position）のViewにFavoriteShopの情報をセットする
      */
+
     override fun onBindViewHolder(holder: FavoriteItemViewHolder, position: Int) {
         holder.bind(getItem(position), position, this)
     }
 }
+
 
 /**
  * お気に入りが登録されているときのリスト
@@ -42,52 +48,63 @@ class FavoriteAdapter : ListAdapter<FavoriteShop, FavoriteItemViewHolder>(Favori
 class FavoriteItemViewHolder(private val binding: RecyclerFavoriteBinding) :
     RecyclerView.ViewHolder(binding.root) {
     fun bind(favoriteShop: FavoriteShop, position: Int, adapter: FavoriteAdapter) {
-        // 偶数番目と奇数番目で背景色を変更させる
-        binding.rootView.setBackgroundColor(
-            ContextCompat.getColor(
-                binding.rootView.context,
-                if (position % 2 == 0) android.R.color.white else android.R.color.darker_gray
+
+        binding.rootView.apply {
+            // 偶数番目と奇数番目で背景色を変更させる
+            binding.rootView.setBackgroundColor(
+                ContextCompat.getColor(
+                    binding.rootView.context,
+                    if (position % 2 == 0) android.R.color.white else android.R.color.darker_gray
+                )
             )
-        )
-        val shop = Shop(
-            favoriteShop.id,
-            favoriteShop.address,
-            CouponUrls(pc = favoriteShop.url, sp = favoriteShop.url),
-            favoriteShop.imageUrl,
-            favoriteShop.name
-        )
+            val shop = Shop(
+                favoriteShop.id,
+                favoriteShop.address,
+                CouponUrls(pc = favoriteShop.url, sp = favoriteShop.url),
+                favoriteShop.imageUrl,
+                favoriteShop.name
+            )
 
 
-        binding.rootView.setOnClickListener{
-            val id:String = favoriteShop.id
-            val imageUrls = favoriteShop.imageUrl
-            val url = if (shop.couponUrls.sp.isNotEmpty()) shop.couponUrls.sp else shop.couponUrls.pc
-            val name = favoriteShop.name
-            val address = favoriteShop.address
-            val isDeleted = false
-            adapter.onClickItem?.invoke(id,name,imageUrls,url,address,isDeleted)
+            binding.rootView.setOnClickListener {
+                val id: String = favoriteShop.id
+                val imageUrls = favoriteShop.imageUrl
+                val url =
+                    if (shop.couponUrls.sp.isNotEmpty()) shop.couponUrls.sp else shop.couponUrls.pc
+                val name = favoriteShop.name
+                val address = favoriteShop.address
+                val isDeleted = true
+                adapter.onClickItem?.invoke(id, name, imageUrls, url, address, isDeleted)
 
+            }
         }
 
-        // nameTextViewのtextプロパティに代入されたオブジェクトのnameプロパティを代入
-        binding.nameTextView.text = favoriteShop.name
+            // nameTextViewのtextプロパティに代入されたオブジェクトのnameプロパティを代入
+            binding.nameTextView.text = favoriteShop.name
 
-        // nameTextViewのaddressプロパティに代入されたオブジェクトのnameプロパティを代入
-        binding.adressTextView.text = favoriteShop.address
-        binding.adressTextView.setTextColor(ContextCompat.getColor(binding.rootView.context, R.color.blue))
+            // nameTextViewのaddressプロパティに代入されたオブジェクトのnameプロパティを代入
+            binding.adressTextView.text = favoriteShop.address
+            binding.adressTextView.setTextColor(
+                ContextCompat.getColor(
+                    binding.rootView.context,
+                    R.color.blue
+                )
+            )
 
+            binding.nameTextView.text = favoriteShop.name
+            // Picassoというライブラリを使ってImageVIewに画像をはめ込む
+            Picasso.get().load(favoriteShop.imageUrl).into(binding.imageView)
 
-        // Picassoというライブラリを使ってImageVIewに画像をはめ込む
-        Picasso.get().load(favoriteShop.imageUrl).into(binding.imageView)
+            // 星をタップした時の処理
+            // ※レイアウトの星のアイコンは既定で塗りつぶしなので設定不要
+            binding.favoriteImageView.setOnClickListener {
+                adapter.onClickDeleteFavorite?.invoke(favoriteShop)
+                adapter.notifyItemChanged(position)
 
-        // 星をタップした時の処理
-        // ※レイアウトの星のアイコンは既定で塗りつぶしなので設定不要
-        binding.favoriteImageView.setOnClickListener {
-            adapter.onClickDeleteFavorite?.invoke(favoriteShop)
-            adapter.notifyItemChanged(position)
+            }
         }
     }
-}
+
 
 /**
  * データの差分を確認するクラス
