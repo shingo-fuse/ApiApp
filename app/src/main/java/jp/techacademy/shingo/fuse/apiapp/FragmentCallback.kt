@@ -11,5 +11,5 @@ interface FragmentCallback {
     fun onAddFavorite(shop: Shop)
 
     // お気に入り削除時の処理
-    fun onDeleteFavorite(favoriteShop: FavoriteShop)
+    fun onDeleteFavorite(id: String)
 }

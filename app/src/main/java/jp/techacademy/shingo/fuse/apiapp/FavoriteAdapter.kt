@@ -2,6 +2,7 @@ package jp.techacademy.shingo.fuse.apiapp
 
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
@@ -10,12 +11,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.squareup.picasso.Picasso
 import jp.techacademy.shingo.fuse.apiapp.databinding.RecyclerFavoriteBinding
 
-class FavoriteAdapter : ListAdapter<FavoriteShop, FavoriteItemViewHolder>(FavoriteCallback()) {
+class FavoriteAdapter : ListAdapter<FavoriteShop,FavoriteItemViewHolder>(FavoriteCallback()) {
 
     // お気に入り画面から削除するときのコールバック（ApiFragmentへ通知するメソッド)
     var onClickDeleteFavorite: ((FavoriteShop) -> Unit)? = null
+
     // Itemを押したときのメソッド
-    var onClickItem: ((String,String,String,String,String,Boolean) -> Unit)? = null
+    var onClickItem: ((String, String, String, String, String, Boolean) -> Unit)? = null
 
 
     /**
@@ -31,8 +33,15 @@ class FavoriteAdapter : ListAdapter<FavoriteShop, FavoriteItemViewHolder>(Favori
     /**
      * 指定された位置（position）のViewにFavoriteShopの情報をセットする
      */
+
     override fun onBindViewHolder(holder: FavoriteItemViewHolder, position: Int) {
-        holder.bind(getItem(position), position, this)
+        val favoriteShop = getItem(position)
+        if (favoriteShop.isDeleted == false) {
+            holder.bind(favoriteShop, position, this)
+        } else {
+            holder.itemView.visibility = View.GONE
+        }
+
     }
 }
 
@@ -42,6 +51,8 @@ class FavoriteAdapter : ListAdapter<FavoriteShop, FavoriteItemViewHolder>(Favori
 class FavoriteItemViewHolder(private val binding: RecyclerFavoriteBinding) :
     RecyclerView.ViewHolder(binding.root) {
     fun bind(favoriteShop: FavoriteShop, position: Int, adapter: FavoriteAdapter) {
+        binding.imageView.visibility = if (favoriteShop.isDeleted) View.INVISIBLE else View.VISIBLE
+
         // 偶数番目と奇数番目で背景色を変更させる
         binding.rootView.setBackgroundColor(
             ContextCompat.getColor(
@@ -64,7 +75,7 @@ class FavoriteItemViewHolder(private val binding: RecyclerFavoriteBinding) :
             val url = if (shop.couponUrls.sp.isNotEmpty()) shop.couponUrls.sp else shop.couponUrls.pc
             val name = favoriteShop.name
             val address = favoriteShop.address
-            val isDeleted = false
+            val isDeleted = true
             adapter.onClickItem?.invoke(id,name,imageUrls,url,address,isDeleted)
 
         }

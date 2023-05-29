@@ -3,12 +3,14 @@ package jp.techacademy.shingo.fuse.apiapp
 
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.squareup.picasso.Picasso
+import jp.techacademy.shingo.fuse.apiapp.FavoriteShop.Companion.getDeletedShops
 import jp.techacademy.shingo.fuse.apiapp.databinding.RecyclerFavoriteBinding
 
 
@@ -23,10 +25,11 @@ class ApiAdapter : ListAdapter<Shop, ApiItemViewHolder>(ApiItemViewHolder.ApiIte
     var onClickAddFavorite: ((Shop) -> Unit)? = null
 
     // 一覧画面から削除するときのコールバック（ApiFragmentへ通知するメソッド)
-    var onClickDeleteFavorite: ((FavoriteShop) -> Unit)? = null
-
+    var onClickDeleteFavorite: ((Shop) -> Unit)? = null
     // Itemを押したときのメソッド
     var onClickItem: ((String,String,String,String,String,Boolean) -> Unit)? = null
+
+
 
 
     /**
@@ -43,7 +46,8 @@ class ApiAdapter : ListAdapter<Shop, ApiItemViewHolder>(ApiItemViewHolder.ApiIte
      * 指定された位置（position）のViewにShopの情報をセットする
      */
     override fun onBindViewHolder(holder: ApiItemViewHolder, position: Int) {
-        holder.bind(getItem(position), position, this)
+            holder.bind(getItem(position), position, this)
+
     }
 }
 
@@ -53,7 +57,6 @@ class ApiAdapter : ListAdapter<Shop, ApiItemViewHolder>(ApiItemViewHolder.ApiIte
 class ApiItemViewHolder(private val binding: RecyclerFavoriteBinding) :
     RecyclerView.ViewHolder(binding.root) {
     fun bind(shop: Shop, position: Int, adapter: ApiAdapter) {
-
         binding.rootView.apply {
             // 偶数番目と奇数番目で背景色を変更させる
             binding.rootView.setBackgroundColor(
@@ -62,20 +65,16 @@ class ApiItemViewHolder(private val binding: RecyclerFavoriteBinding) :
                     if (position % 2 == 0) android.R.color.white else android.R.color.darker_gray
                 )
             )
-
             setOnClickListener {
-                val id:String = shop.id
+                val id: String = shop.id
                 val imageUrls = shop.logoImage
-                val url = if (shop.couponUrls.sp.isNotEmpty()) shop.couponUrls.sp else shop.couponUrls.pc
+                val url =
+                    if (shop.couponUrls.sp.isNotEmpty()) shop.couponUrls.sp else shop.couponUrls.pc
                 val name = shop.name
                 val address = shop.address
-                val isDeleted = false
-                adapter.onClickItem?.invoke(id,name,url,imageUrls,address,isDeleted)
-
-
-
+                val isDeleted = true
+                adapter.onClickItem?.invoke(id, name, url, imageUrls, address, isDeleted)
             }
-
         }
         // nameTextViewのtextプロパティに代入されたオブジェクトのnameプロパティを代入
         binding.nameTextView.text = shop.name
@@ -92,26 +91,30 @@ class ApiItemViewHolder(private val binding: RecyclerFavoriteBinding) :
         // Picassoライブラリを使い、imageViewにdata.logoImageのurlの画像を読み込ませる
         Picasso.get().load(shop.logoImage).into(binding.imageView)
 
-        // 星の処理
-        binding.favoriteImageView.apply {
-            // お気に入り状態を取得
-            val isFavorite = FavoriteShop.findBy(shop.id) != null
+            // 星の処理
+            binding.favoriteImageView.apply {
 
-            // 白抜きの星を設定
-            setImageResource(if (isFavorite) R.drawable.ic_star else R.drawable.ic_star_border)
 
-            // 星をタップした時の処理
-            setOnClickListener {
-                if (isFavorite) {
-                    val favoriteShop = FavoriteShop()
-                    adapter.onClickDeleteFavorite?.invoke(favoriteShop)
-                } else {
-                    adapter.onClickAddFavorite?.invoke(shop)
+            var isFavorite = FavoriteShop.findBy(shop.id) != null
+
+                // 白抜きの星を設定
+                setImageResource(if (isFavorite) R.drawable.ic_star else R.drawable.ic_star_border)
+
+                setOnClickListener {
+                    if (isFavorite) {
+                        adapter.onClickDeleteFavorite?.invoke(shop)
+
+                    } else {
+                        adapter.onClickAddFavorite?.invoke(shop)
+                    }
+                    adapter.notifyItemChanged(position)
+
+
                 }
-                adapter.notifyItemChanged(position)
             }
         }
-    }
+
+
 
 
     /**

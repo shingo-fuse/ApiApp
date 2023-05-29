@@ -55,7 +55,7 @@ class WebViewActivity : AppCompatActivity(),FragmentCallback {
 
             setOnClickListener {
                 if (isFavorite) {
-                    onDeleteFavorite(favoriteShop)
+                    onDeleteFavorite(favoriteShop.id)
                 } else {
                     onAddFavorite(shop)
                 }
@@ -126,25 +126,25 @@ class WebViewActivity : AppCompatActivity(),FragmentCallback {
     }
 
 
-    override fun onDeleteFavorite(favoriteShop: FavoriteShop) {
-        showConfirmDeleteFavoriteDialog(favoriteShop)
+    override fun onDeleteFavorite(id:String) {
+        showConfirmDeleteFavoriteDialog(id)
     }
 
 
-    private fun showConfirmDeleteFavoriteDialog(favoriteShop: FavoriteShop) {
+    private fun showConfirmDeleteFavoriteDialog(id: String) {
         AlertDialog.Builder(this)
             .setTitle(R.string.delete_favorite_dialog_title)
             .setMessage(R.string.delete_favorite_dialog_message)
             .setPositiveButton(android.R.string.ok) { _, _ ->
-                deleteFavorite(favoriteShop)
+                deleteFavorite(id)
             }
             .setNegativeButton(android.R.string.cancel) { _, _ -> }
             .create()
             .show()
     }
 
-    private fun deleteFavorite(favoriteShop: FavoriteShop) {
-        FavoriteShop.delete(favoriteShop)
+    private fun deleteFavorite(id: String) {
+        FavoriteShop.delete(id)
 
     }
 

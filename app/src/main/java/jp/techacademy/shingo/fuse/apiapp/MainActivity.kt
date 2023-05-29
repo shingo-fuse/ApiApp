@@ -91,16 +91,16 @@ class MainActivity : AppCompatActivity(), FragmentCallback {
     /**
      * Favoriteから削除するときのメソッド(Fragment -> Activity へ通知する)
      */
-    override fun onDeleteFavorite(favoriteShop: FavoriteShop) {
-        showConfirmDeleteFavoriteDialog(favoriteShop)
+    override fun onDeleteFavorite(id: String) {
+        showConfirmDeleteFavoriteDialog(id)
     }
 
-    private fun showConfirmDeleteFavoriteDialog(favoriteShop: FavoriteShop) {
+    private fun showConfirmDeleteFavoriteDialog(id: String) {
         AlertDialog.Builder(this)
             .setTitle(R.string.delete_favorite_dialog_title)
             .setMessage(R.string.delete_favorite_dialog_message)
             .setPositiveButton(android.R.string.ok) { _, _ ->
-                deleteFavorite(favoriteShop)
+                deleteFavorite(id)
                 if (binding.tabLayout.selectedTabPosition == VIEW_PAGER_POSITION_FAVORITE) {
                     showFavoriteTabInfo(binding.tabLayout.getTabAt(binding.tabLayout.selectedTabPosition)!!)
                 }
@@ -110,9 +110,8 @@ class MainActivity : AppCompatActivity(), FragmentCallback {
             .show()
     }
 
-    private fun deleteFavorite(favoriteShop: FavoriteShop) {
-        favoriteShop.isDeleted =true
-         FavoriteShop.delete(favoriteShop)
+    private fun deleteFavorite(id: String) {
+         FavoriteShop.delete(id)
 
         (viewPagerAdapter.fragments[VIEW_PAGER_POSITION_API] as ApiFragment).updateView()
         (viewPagerAdapter.fragments[VIEW_PAGER_POSITION_FAVORITE] as FavoriteFragment).updateData()

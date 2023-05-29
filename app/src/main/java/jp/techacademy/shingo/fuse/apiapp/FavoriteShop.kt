@@ -1,5 +1,6 @@
 package jp.techacademy.shingo.fuse.apiapp
 
+import android.util.Log
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 import io.realm.kotlin.ext.query
@@ -41,8 +42,8 @@ open class FavoriteShop(id: String, imageUrl: String, name: String,  url: String
 
             // Realmデータベースからお気に入り情報を取得
             // mapでディープコピーしてresultに代入する
-            val result = realm.query<FavoriteShop>().find()
-                .map { FavoriteShop(it.id, it.imageUrl, it.name, it.url,it.address,it.isDeleted) }
+            val result = realm.query<FavoriteShop>().find().map { FavoriteShop(it.id, it.imageUrl, it.name, it.url,it.address,it.isDeleted) }
+
 
             // Realmデータベースとの接続を閉じる
             realm.close()
@@ -87,19 +88,33 @@ open class FavoriteShop(id: String, imageUrl: String, name: String,  url: String
         /**
          * idでお気に入りから削除する
          */
-        fun delete(favoriteShop:FavoriteShop) {
+        fun delete(id: String) {
             // Realmデータベースとの接続を開く
             val config = RealmConfiguration.create(schema = setOf(FavoriteShop::class))
             val realm = Realm.open(config)
 
 
             realm.writeBlocking {
-                copyToRealm(favoriteShop)
+                val favoriteShops = realm.query<FavoriteShop>("id == '$id'").first().find()
+                findLatest(favoriteShops!!).apply{
+                    this!!.isDeleted = true
                 }
-            realm.close()
+                Log.d("test", favoriteShops.isDeleted.toString())
             }
-
-            // Realmデータベースとの接続を閉じる
-
+            realm.close()
         }
+
+        fun getDeletedShops(): Boolean {
+            // Realmデータベースとの接続を開く
+            val config = RealmConfiguration.create(schema = setOf(FavoriteShop::class))
+            val realm = Realm.open(config)
+
+            val deletedShops = realm.query<FavoriteShop>("isDeleted == true").find().map { FavoriteShop(it.id, it.imageUrl, it.name, it.url,it.address,it.isDeleted) }
+
+
+            realm.close()
+            return deletedShops
+        }
+
+    }
     }
