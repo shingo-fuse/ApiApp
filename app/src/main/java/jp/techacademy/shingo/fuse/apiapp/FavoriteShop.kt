@@ -78,7 +78,7 @@ open class FavoriteShop(id: String, imageUrl: String, name: String, url: String,
             val config = RealmConfiguration.create(schema = setOf(FavoriteShop::class))
             val realm = Realm.open(config)
 
-            val result = realm.query<FavoriteShop>("id=='$id' and isDeleted == false " ).first().find()
+            val result = realm.query<FavoriteShop>("id=='$id'").first().find()
 
             // Realmデータベースとの接続を閉じる
             realm.close()
@@ -112,10 +112,6 @@ open class FavoriteShop(id: String, imageUrl: String, name: String, url: String,
                 }
             realm.close()
         }
-
-
-
-
 
         /**
          * idでお気に入りから削除する
