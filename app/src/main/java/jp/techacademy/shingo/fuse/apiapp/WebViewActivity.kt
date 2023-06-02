@@ -111,8 +111,8 @@ class WebViewActivity : AppCompatActivity(),FragmentCallback {
         ) {}
 
     override fun onAddFavorite(shop: Shop) {
-        val findShop = findBy(shop.id)
-        if (findShop != null) {
+        val findShop = findById(shop.id)
+        if (findShop == null) {
             FavoriteShop.insert(FavoriteShop().apply {
                 id = shop.id
                 name = shop.name
